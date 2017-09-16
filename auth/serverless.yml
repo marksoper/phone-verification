@@ -1,0 +1,187 @@
+service: auth
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+
+functions:
+
+  auth-request-verification-code:
+    name: auth-request-verification-code
+    description: Takes a phoneNumber and creates a verification code/challenge
+    role: lambdaAuthRequestVerificationCodeRole
+    handler: request-verification-code.requestVerificationCode
+    events:
+      - http:
+          path: auth/request-verification-code
+          method: post
+
+  auth-send-sms-verification-code:
+    name: auth-send-sms-verification-code
+    description: Takes a verification code/challenge and sends verification code to its phoneNumber
+    role: lambdaAuthSendSMSVerificationCodeRole
+    handler: send-sms-verification-code.sendSMSVerificationCode
+
+    #
+    # Serverless doesn't support kinesis event mapping currently
+    # This needs to be run in command line to establish kinesis event mapping
+    #
+    #aws lambda create-event-source-mapping \
+    #--region < region > \
+    #--function-name auth-send-sms-verification-code \
+    #--event-source  arn:aws:kinesis:< region >:< AWS account ID >:stream/phone-verification-stream \
+    #--starting-position TRIM_HORIZON
+    #
+
+  auth-verify-verification-code:
+    name: auth-verify-verification-code
+    description: Takes a verificationCode and if it matches, marks the challenge verified
+    role: lambdaAuthVerifyVerificationCodeRole
+    handler: verify-verification-code.verifyVerificationCode
+    events:
+      - http:
+          path: auth/verify-verification-code
+          method: post
+
+resources:
+  Resources:
+
+    lambdaAuthSendSMSVerificationCodeRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /lambda/auth/
+        RoleName: lambdaAuthSendSMSVerificationCodeRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: lambdaAuthSendSMSVerificationCodeRolePolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: "arn:aws:logs:*:*:*"
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogStream
+                  Resource:
+                    - arn:aws:logs:< region >:< AWS account ID >:log-group:/aws/lambda/verificationEventLog:*
+                - Effect: Allow
+                  Action:
+                    - logs:PutLogEvents
+                  Resource:
+                    - arn:aws:logs:< region >:< AWS account ID >:log-group:/aws/lambda/verificationEventLog:*:*
+                - Effect: Allow
+                  Action:
+                    - kinesis:GetShardIterator
+                    - kinesis:GetRecords
+                    - kinesis:DescribeStream
+                    - kinesis:ListStreams
+                  Resource: arn:aws:kinesis:< region >:< AWS account ID >:stream/VerificationChallenges
+                - Effect: Allow
+                  Action:
+                    - dynamodb:GetItem
+                    - dynamodb:PutItem
+                  Resource: arn:aws:dynamodb:< region >:< AWS account ID >:table/VerificationChallenges
+
+    lambdaAuthRequestVerificationCodeRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /lambda/auth/
+        RoleName: lambdaAuthRequestVerificationCodeRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: lambdaAuthRequestVerificationCodeRolePolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: "arn:aws:logs:*:*:*"
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogStream
+                  Resource:
+                    - arn:aws:logs:< region >:< AWS account ID >:log-group:/aws/lambda/verificationEventLog:*
+                - Effect: Allow
+                  Action:
+                    - logs:PutLogEvents
+                  Resource:
+                    - arn:aws:logs:< region >:< AWS account ID >:log-group:/aws/lambda/verificationEventLog:*:*
+                - Effect: Allow
+                  Action:
+                    kinesis:*
+                  Resource:
+                    arn:aws:kinesis:< region >:< AWS account ID >:stream/phone-verification-stream
+                - Effect: Allow
+                  Action:
+                    - dynamodb:GetItem
+                    - dynamodb:PutItem
+                  Resource: arn:aws:dynamodb:< region >:< AWS account ID >:table/VerificationChallenges
+
+    lambdaAuthVerifyVerificationCodeRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /lambda/auth/
+        RoleName: lambdaAuthVerifyVerificationCodeRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: lambdaAuthVerifyVerificationCodeRolePolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: "arn:aws:logs:*:*:*"
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogStream
+                  Resource:
+                    - arn:aws:logs:< region >:< AWS account ID >:log-group:/aws/lambda/verificationEventLog:*
+                - Effect: Allow
+                  Action:
+                    - logs:PutLogEvents
+                  Resource:
+                    - arn:aws:logs:< region >:< AWS account ID >:log-group:/aws/lambda/verificationEventLog:*:*
+                - Effect: Allow
+                  Action:
+                    kinesis:*
+                  Resource:
+                    arn:aws:kinesis:< region >:< AWS account ID >:stream/VerificationChallenges
+                - Effect: Allow
+                  Action:
+                    - dynamodb:GetItem
+                    - dynamodb:PutItem
+                    - dynamodb:UpdateItem
+                  Resource: arn:aws:dynamodb:< region >:< AWS account ID >:table/VerificationChallenges
+
+

@@ -1,0 +1,20 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "eslint-config-airbnb-base",
+    "prettier"
+  ],
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
+    "import/no-extraneous-dependencies": 0,
+    "import/no-unresolved": 0, 
+    "prettier/prettier": [
+        "error",
+        { "singleQuote": true,
+          "tabWidth": 2
+        }
+    ]
+  }
+}

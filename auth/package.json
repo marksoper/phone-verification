@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "asyncawait": "^1.0.6",
+    "plivo": "^0.4.1"
+  }
+}

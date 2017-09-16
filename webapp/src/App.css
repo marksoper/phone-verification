@@ -1,0 +1,45 @@
+.App {
+  text-align: left;
+  margin-top: 50px;
+  padding: 100px 72px;
+  width: 480px;
+  height: 720px;
+  background-color: #fff;
+}
+
+.App h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.App label {
+  color: #999;
+}
+
+.phone-input-container {
+  margin-top: 40px;
+}
+
+.phone-submit-button-container {
+  margin-top: 40px;
+}
+
+.verification-code-input-container input {
+  font-size: 18px;
+  width: 180px;
+  padding: 4px 8px;
+}
+
+.verification-code-input-container button {
+  margin-left: 10px;
+  margin-top: -6px;
+}
+
+.verification-code-input-container label {
+  margin-bottom: 30px;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

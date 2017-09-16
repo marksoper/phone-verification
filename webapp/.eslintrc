@@ -1,0 +1,22 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "eslint-config-airbnb",
+    "react-app",
+    "prettier",
+    "prettier/react"
+  ],
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "react/prefer-stateless-function": [1, { "ignorePureComponents": true }],
+    "prettier/prettier": [
+        "error",
+        { "singleQuote": true,
+          "tabWidth": 2
+        }
+    ]
+  }
+}
